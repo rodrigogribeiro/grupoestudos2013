@@ -1,0 +1,141 @@
+\documentclass[a4paper,11pt]{exam}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{wasysym}
+\usepackage{amssymb}
+\usepackage{color}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+
+
+\begin{document}
+\topmargin=0pt
+\renewcommand{\solutiontitle}{\noident \textbf{Solução:} \par }
+
+\section{Programação Funcional em Haskell --- Lista 1}
+\begin{questions}
+
+  \question Defina a função \texttt{double :: Int ->  Int}, que dado um inteiro, 
+  retorna 2 vezes o valor do argumento.
+  
+  \question Defina a função  \texttt{double2 :: Int -> Int}, usando \texttt{double}, que
+  retorna 4 vezes o valor do argumento.
+  
+  \question Defina a função \texttt{sel :: Bool -> Int -> Int -> Int}, que se comporta do
+   seguinte modo: Se o valor do primeiro argumento for \texttt{false}, a função deve retornar o segundo 
+   argumento, se o valor do primeiro argumento for \texttt{true}, a função deve retorna o terceiro argumento.\\
+
+  \question Defina a função \texttt{max2 :: Int -> Int -> Int} que retorna o maior entre o dois parâmetros: 
+   \begin{itemize}
+      \item Usando a função \texttt{sel} do exercício 3.
+      \item Sem usar a função \texttt{sel} do exercício 3. 
+   \end{itemize}
+   
+  \question Defina \texttt{max3 :: Int -> Int -> Int -> Int} que retorna o maior entre 3 parâmetros, usando
+  \texttt{max2}.
+
+  \question Defina a função \texttt{eq2 :: Int -> Int -> Bool} que retorna \texttt{true} se ambos os argumentos
+   são iguais e \texttt{false} caso contrário. \textbf{OBS:} Lembre-se que Haskell \textbf{não} unifica variáveis!
+
+  \question Defina a função  \texttt{diferent3 :: Int -> Int -> Int -> Bool} que retorna \texttt{true} se os 3 argumentos
+   forem diferentes, e \texttt{false} caso contrário. 
+    
+ 
+  \question  O algoritmo de Euclides pode ser usado para achar o maior divisor comum entre dois números.
+  Matematicamente o algoritmo de Euclides pode ser definido do seguinte modo: 
+   \begin{center} 
+      \begin{tabular}{lcl}
+         $gcd(a,0)$ & = & $a$ \\
+         $gcd(a,b)$ & = & $gcd(b,a \;mod\; b)$\\
+      \end{tabular}
+   \end{center}
+   Onde $mod$ é a operação que retorna o resto da divisão.\\ 
+   \textbf{OBS:} Em Hsakell,  a função \texttt{mod} retorna o resto da divisão do primeiro
+   argumento pelo segundo.
+   \begin{parts}
+      \part Implemente o algoritmo de Euclides em Haskell.
+      \part Implemente a função que computa o mínimo múltiplo comum entre dois números, definido como:
+\[
+      \begin{array}{lcl}
+         lcm(a,b) & = &\displaystyle \frac{a\,\cdot\,b}{gcd(a,b)}
+      \end{array}
+\]  
+   \end{parts}
+   
+  
+  \question  A função 91 de McCarthy é definida do seguinte modo:
+  \[ 
+    m(x)\; = \; \left\{
+    \begin{array}{l l}
+        n-10 \quad & \text{se $n$ $>$ 100}\\
+        m(m(n+11)) \quad & \text{se $n$ $\leq$ 100 }\\
+    \end{array} \right.
+  \]
+  Defina esta função em Haskell. Qual valor esta função retorna para valores de entrada positivos menores que 101 ?
+  
+  
+  \question  Uma fração pode ser representada por pares de valores inteiros, onde o primeiro elemento do par representa
+  o numerador e o segundo elemento do par representa o denominador. Por exemplo as seguintes frações
+  \begin{center}
+     \[\displaystyle \frac{3}{5},\quad  \frac{2}{8} \quad e \quad \frac{3}{4} \]
+  \end{center}
+  poderiam se expressas em Haskell como :
+  \begin{center}
+     (3,5), (2,8) e (3,4)
+  \end{center}
+  Considerado esta representação defina: 
+  \begin{parts}
+     \part A função \texttt{multf :: (Int,Int) -> (Int,Int) -> (Int,Int)} que multiplica duas frações.\\
+      Ex.:\\ 
+      GHCi$>$  multf (3,5) (2,8)\\
+      (6,40)
+     \part A função \texttt{somaf :: (Int,Int) -> (Int,Int) -> (Int,Int)} que soma duas frações.\\
+      Ex.:\\ 
+      GHCi$>$ somaf (1,2) (1,4)\\
+       (6,8)\\
+      \part A função \texttt{subf :: (Int,Int) -> (Int,Int) -> (Int,Int)} que subtrai duas frações.\\
+      \part A função \texttt{divf :: (Int,Int) -> (Int,Int) -> (Int,Int)} que divide duas frações.\\
+      \part A função \texttt{toReal :: (Int,Int) -> Float} que converte a fração em um número real.\\
+  \end{parts}
+  
+   \question Defina a função \texttt{intercala :: [Int] -> [Int] -> [Int]} que intercala duas listas de inteiros, 
+    do seguinte modo :\\
+    GHCi$>$\texttt{intercala [1,2,3] [7,8]}\\
+    \texttt{[1,7,2,8,3]}
+   
+     
+	  \item Defina a fun\c{c}\~ao \texttt{quads :: Int -> Int -> [Int]} que retorna a lista formada pelos quadrados
+	        dos n\'umeros presentes no intervalo n\'umerico definido pelo primeiro e segundo argumento. Isto \'e
+	        \texttt{quads 1 5 $\rhd$ [1,4,9,16,25]}
+	  \item Defina a fun\c{c}\~ao \texttt{sumQuads :: Int -> Int -> Int} que retorna a soma dos quadrados dos n\'umeros
+	        definidos pelo intervalo do primeiro e segundo par\^ametro.  
+	  \item Defina uma fun\c{c}\~ao \texttt{divisors :: Int -> [Int]} de maneira que \texttt{divisors n} retorne todos os
+	        divisores do n\'umero \texttt{n}.
+	  \item Um n\'umero \'e dito ser perfeito se ele \'e igual a soma de seus divisores. Defina uma fun\c{c}\~ao 
+	        \texttt{perfect :: Int -> Bool} que retorna verdadeiro se o n\'umero passado como argumento \'e um 
+	        n\'umero perfeito.
+	  \item Um n\'umero \'e dito ser primo se ele \' divis\'ivel por \texttt{1} e por ele pr\'oprio. 
+	        Defina uma fun\c{c}\~ao \texttt{prime :: Int -> Bool} que
+                retorne verdadeiro se um n\'umero \'e primo.
+          \item Defina a função \texttt{primes :: Int -> [Int]} que retorna
+            todos os primos no intervalo $[1,n]$, onde $n$ \'e o par\^ametro
+            para a função \texttt{primes}.
+	  \item Defina uma fun\c{c}\~ao \texttt{media :: [Int] -> Float} que calcule a m\'edia dos valores de uma lista.
+	  \item Uma lista \'e um pal\'indromo se esta for igual ao seu
+            inverso. Defina uma fun\c{c}\~ao \texttt{palindrome}, tal que \texttt{palindrome xs} retorne verdadeiro se a lista
+	        \texttt{xs} \'e um pal\'indromo. Qual o tipo desta fun\c{c}\~ao?
+	  \item Defina uma fun\c{c}\~ao \texttt{toPalindrome} que receba uma lista e a transforme em um pal\'indromo caso
+	        esta n\~ao seja um. Exemplos \texttt{toPalindrome [1,2,3] $\rhd$ [1,2,3,3,2,1]} e 
+	        \texttt{toPalindrome [1,2,1] $\rhd$ [1,2,1]}. Qual o tipo
+                desta fun\c{c}\~ao? 
+           \item[\ ]
+           \item[\ ] Essa lista foi elaborada em conjunto com o prof. Elton
+             M\'aximo Cardoso.
+
+\end{questions}
+
+
+\end{document}
