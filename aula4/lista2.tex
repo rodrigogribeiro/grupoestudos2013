@@ -1,0 +1,156 @@
+\documentclass[10pt,a4paper]{report}
+
+\usepackage[brazil]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath,amsfonts}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usepackage{latexsym}
+\usepackage{pgf}
+
+\newcounter{conta}
+ 
+\begin{document}
+ 
+ \hfill DECSI - UFOP \\
+{\it Grupo de Estudos de Programa\c{c}\~ao Funcional}
+ \hfill $\mbox{2}^{\mbox{\underline{o}}}$ semestre de 2013 \\
+Professor: \parbox[t]{14cm}{Rodrigo Geraldo Ribeiro \\
+                     e-mail: rodrigogribeiro@decsi.ufop.br}
+ 
+\noindent {\bf Lista de Exerc\'icios 2} \hfill {\bf Tema: Fun\c{c}\~oes de Ordem Superior}
+
+\hfill
+
+Em an\'alise num\'erica, a \emph{regra de Horner} \'e um algoritmo eficiente para a avalia\c{c}\~ao / 
+representa\c{c}\~ao de polin\^omios.
+
+Dado o polin\^omio:
+\begin{equation*}
+   p(x) = \sum_{k=0}^{n}a_{k}x^{k} = a_{n}x^{n} + a_{n - 1}x^{n - 1} + ... + a_{1}x^{1} + a_{0}
+\end{equation*}
+onde $a_{0}, ..., a_{n}$ s\~ao n\'umeros reais, podemos orden\'a-lo usando uma
+ordem decrescente de expoentes. Uma vez que os expoentes s\~ao apresentados em ordem decrescente, podemos representar
+um polin\^omio utilizando apenas uma lista que cont\^em seus coeficientes. Desta maneira, o seguinte tipo Haskell pode
+ser utilizado para representar um polin\^omio:
+
+\begin{verbatim}
+   type Polynomial = [Int]
+\end{verbatim}
+isto \'e, um polin\^omio \'e representado como uma lista de seus coeficientes em ordem decrescente de expoentes.
+Se um valor $a_{i}$ est\'a na $i$-\'esima
+posi\c{c}\~ao da lista, ent\~ao o coeficiente $a_{i}$ corresponde ao termo $x^{i}$. Isto \'e, a $i$-\'esima 
+posi\c{c}\~ao da lista representa o termo correspondente ao expoente $i$. Considere o seguinte polin\^omio:
+\begin{equation*}
+   p(x) = 4x^{3} + 2x^{2} - 5
+\end{equation*}
+Este seria representado como:
+\begin{verbatim}
+   px = [4, 2, 0, -5]
+\end{verbatim}
+Cabe ressaltar que caso o polin\^omio n\~ao possua um termo correspondente a um determinado expoente, este \'e
+ representado com o coeficiente $0$. No polin\^omio $4x^{3}+2x^{2}-5$, n\~ao existe termo para o expoente $1$, e,
+ portanto, este \'e representado utilizando o valor $0$ como seu coeficiente.
+ 
+Baseado no que foi apresentado, desenvolva o que se pede a seguir. Para cada item, \'e apresentado um exemplo 
+envolvendo o polin\^omio $4x^{3} + 2x^{2} - 5$, isto \'e, \texttt{[4,2,0,-5]}.
+
+\begin{enumerate}
+    \item Desenvolva a fun\c{c}\~ao:
+    \begin{verbatim}
+		grade :: Polynomial -> Int
+    \end{verbatim}
+    que retorna o maior expoente do polin\^omio fornecido como par\^ametro. Exemplo:
+    \begin{verbatim}
+        grade [4, 2, 0, -5] = 3
+    \end{verbatim}
+    \item Para somar dois polin\^omios basta somar os coeficientes de termos de mesmo expoente. O objetivo deste
+          exerc\'icio \'e implementar a fun\c{c}\~ao:
+    \begin{verbatim}
+		(.+.) :: Polynomial -> Polynomial -> Polynomial
+    \end{verbatim}
+    que recebe dois polin\^omios como par\^ametros e retorna como resultado a soma destes. Por\'em, nem sempre os dois
+    polin\^omios a serem somados possuem o mesmo grau (maior expoente). Como exemplo, considere
+    \begin{center}\[
+	    \begin{array}{lcl}
+    	   p_{1}(x) & = & 4x^{3} + 2x^{2} - 5\\
+	       p_{2}(x) & = & 6x^{2} + 1
+    	\end{array} \]   
+    \end{center}    
+    Portanto, temos que: $ p_{1}(x) + p_{2}(x) = 4x^{3} + 8x^{2} - 4$. Um inconveniente deste fato, \'e que a 
+    representa\c{c}\~ao de polin\^omios n\~ao est\'a normalizada, isto \'e, ambos os polin\^omios a serem somados 
+    n\~ao possuem o mesmo grau. No exemplo anterior, temos que:
+    \begin{verbatim}
+		p1x = [4, 2, 0, -5]
+		p2x = [6, 0, 1]
+    \end{verbatim} 
+    A vers\~ao normalizada destes polin\^omios (isto \'e, ambos possuindo o mesmo grau) seria:
+    \begin{verbatim}
+		p1x = [4, 2, 0, -5]
+		p2x = [0, 6, 0, 1]
+    \end{verbatim} 
+    Observe que a \'unica altera\c{c}\~ao realizada foi acrescentar no segundo polin\^omio o coeficiente $0$, para
+    que ambos possu\'issem termos de expoente $3$.
+    \begin{enumerate}
+    	\item Desenvolva a fun\c{c}\~ao:
+    	\begin{verbatim}
+			normalize :: Polynomial -> Polynomial -> (Polynomial, Polynomial)
+    	\end{verbatim}
+    	que recebe como par\^ametro dois polin\^omios possivelmente n\~ao normalizados e retorna um par contendo
+    	os dois polin\^omios fornecidos como par\^ametros normalizados. Exemplo:
+    	\begin{verbatim}
+normalize [4, 2, 0, -5] [6, 0, 1] = ([4,2,0,-5], [0,6,0,1])
+    	\end{verbatim}
+    	\item Utilizando a fun\c{c}\~ao \texttt{normalize}, desenvolvida no item anterior, implemente a fun\c{c}\~ao
+	    \begin{verbatim}
+		(.+.) :: Polynomial -> Polynomial -> Polynomial
+    	\end{verbatim}   
+    	que soma dois polin\^omios fornecidos como argumento. Exemplo:
+    	\begin{verbatim}
+[4,2,0,-5] .+. [0,6,0,1] = [4, 8, 0, -4]    	   
+    	\end{verbatim}
+    \end{enumerate}
+    \item Seja $p(x)$ o seguinte polin\^omio
+\begin{equation*}
+   p(x) = \sum_{k=0}^{n}a_{k}x^{k} = a_{n}x^{n} + a_{n - 1}x^{n - 1} + ... + a_{1}x^{1} + a_{0}
+\end{equation*}    
+    A derivada de $p(x)$, $\frac{\displaystyle{d}}{\displaystyle{dx}}(p(x))$, \'e definida como:
+\begin{equation*}
+   \frac{\displaystyle{d}}{\displaystyle{dx}}(p(x)) = \sum_{k=1}^{n}k\times (a_{k}x^{k - 1}) =\\
+   n\times a_{n}x^{n - 1} + (n - 1)\times a_{n - 1}x^{(n - 1) - 1} + ... + 1\times a_{1}x^{0}
+\end{equation*}    
+   Como exemplo, considere o polin\^omio $4x^{3} + 2x^{2} - 5$. A derivada deste \'e igual a:
+   \begin{equation*}
+       \frac{\displaystyle{d}}{\displaystyle{dx}}(4x^{3} + 2x^{2} - 5) = \\
+       3\times 4x^{2} + 2 \times 2x^{1} = \\
+       12 x^{2} + 4x
+   \end{equation*}
+   Com base no apresentado, desenvolva a fun\c{c}\~ao:
+   \begin{verbatim}
+derivative :: Polynomial -> Polynomial
+   \end{verbatim}
+   que dado um polin\^omio como entrada, retorna a derivada deste. Exemplo:
+   \begin{verbatim}
+derivative [4, 2, 0, -5] = [12, 4, 0]
+   \end{verbatim}
+   \item A representa\c{c}\~ao de Horner pode ser utilizada para obter um algoritmo eficiente para calcular o 
+   valor de um polin\^omio para um determinado valor $x_{0}$. Seja $p(x)$ o polin\^omio:
+\begin{equation*}
+   p(x) = \sum_{k=0}^{n}a_{k}x^{k} = a_{n}x^{n} + a_{n - 1}x^{n - 1} + ... + a_{1}x^{1} + a_{0}
+\end{equation*} 
+e $x_{0}$ um inteiro qualquer. Ent\~ao $p(x_{0})$ \'e igual a:
+\begin{equation*}
+ p(x_{0}) = a_{0} + x \times (a_{1} + x \times (a_{2} + ... + x\times (a_{n - 1} + x\times a_{n}\underbrace{) ... ))}_{\text{n par\^entesis}}
+\end{equation*}
+Com base no apresentado, desenvolva a fun\c{c}\~ao:
+\begin{verbatim}
+   eval :: Int -> Polynomial -> Int
+\end{verbatim}
+que recebe um valor inteiro e um polin\^omio e retorna como resultado o valor deste polin\^omio para o inteiro
+ fornecido como par\^ametro. Exemplo:
+\begin{verbatim}
+  eval 2 [4 , 2, 0, -5] = 35
+\end{verbatim}
+\end{enumerate}
+\end{document}
