@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Arch Linux) (format=pdflatex 2013.11.5)  28 NOV 2013 21:43
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Arch Linux) (format=pdflatex 2013.11.5)  29 NOV 2013 10:34
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -399,7 +399,7 @@ LaTeX Font Info:    Overwriting symbol font `lasy' in version `bold'
 )
 \c@conta=\count121
 
-No file lista2.aux.
+(./lista2.aux)
 \openout1 = `lista2.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 14.
@@ -414,7 +414,7 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 14.
 LaTeX Font Info:    ... okay on input line 14.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 14.
 LaTeX Font Info:    ... okay on input line 14.
-ABD: EveryShipout initializing macros
+ ABD: EveryShipout initializing macros
 (/usr/share/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count122
@@ -525,8 +525,8 @@ m/n/10 + \OML/cmm/m/it/10 ::: \OT1/cmr/m/n/10 + 1 \OMS/cmsy/m/n/10 ^^B \OML/cmm
 
 [2] [3] (./lista2.aux) ) 
 Here is how much of TeX's memory you used:
- 11308 strings out of 493311
- 203303 string characters out of 6143650
+ 11310 strings out of 493311
+ 203325 string characters out of 6143650
  253619 words of memory out of 5000000
  14515 multiletter control sequences out of 15000+600000
  9729 words of font info for 31 fonts, out of 8000000 for 9000
