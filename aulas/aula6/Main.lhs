@@ -152,12 +152,11 @@ Definição de Tipos em Haskell --- (XII)
  newtype DiffList a = DiffList { out :: [a] -> [a] } 
 ~~~~~~~~~~~
 
-> data Tree a = Leaf
->              | Node a (Tree a) (Tree a)
->              deriving (Eq, Ord, Show)
+> data MyList a = Empty | OneMore a (MyList a)
+>                 deriving (Eq, Ord, Show)
 
-Definição de Tipo em Haskell --- (XIV)
-======================================
+Definição de Tipos em Haskell --- (XIII)
+========================================
 
 - Tipos polimórficos:
     - Variáveis de tipos representam "qualquer" tipo.
@@ -166,12 +165,81 @@ Definição de Tipo em Haskell --- (XIV)
 
 ~~~~~~~~~~~~~~~~{.haskell}
 Tree Int, Tree (a,Bool),
-[Tree Char],
-([Char], Tree String)...
+[Tree Char], MyList Char
+([Char], Tree String),...
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-Definição de Tipos em Haskell --- (XIII)
+Definição de Tipos em Haskell --- (XIV)
+======================================
+
+- Continuando com o tipo MyList...
+
+> sumMyList :: Num a => MyList a -> a
+> sumMyList Empty = 0
+> sumMyList (OneMore x xs) = x + sumMyList xs
+
+> filterMyList :: (a -> Bool) -> MyList a -> MyList a
+> filterMyList p Empty = Empty
+> filterMyList p (OneMore x xs)
+>              | p x = OneMore x (filterMyList p xs)
+>              | otherwise = filterMyList p xs
+
+
+Definição de Tipos em Haskell --- (XV)
+======================================
+
+- Note que o tipo MyList a é equivalente ao tipo [a]...
+     - Isso pode ser mostrado por funções que convertem um tipo em outro:
+
+> toList :: MyList a -> [a]
+> toList Empty = []
+> toList (OneMore x xs) = x : toList xs
+
+> toMyList :: [a] -> MyList a
+> toMyList [] = Empty
+> toMyList (x:xs) = OneMore x (toMyList xs)
+
+
+Definição de Tipos em Haskell --- (XVI)
+=======================================
+
+- Note que a função toMyList pode ser definida usando foldr:
+
+> toMyList' :: [a] -> MyList a
+> toMyList' = foldr OneMore Empty
+
+- Dessa forma, cabe a pergunta: toList pode ser definida usando foldr?
+    - Sim! Mas para isso precisamos definir a função foldr para o tipo MyList.
+
+Definição de Tipos em Haskell --- (XVII)
+========================================
+
+- Definição de fold para o tipo MyList
+
+> foldMyList :: (a -> b -> b) -> b -> MyList a -> b
+> foldMyList f v Empty = v
+> foldMyList f v (OneMore x xs) = f x (foldMyList f v xs)
+
+- Com isso, a definição de toList ficaria...
+
+> toList' :: MyList a -> [a]
+> toList' = foldMyList (:) []
+
+Definição de Tipos em Haskell --- (XVIII)
+==========================================
+
+- Mais um exemplo: árvores binárias
+
+> data Tree a = Leaf | Node a (Tree a) (Tree a)
+>               deriving (Eq, Ord, Show)
+
+- Exemplo
+
+> t :: Tree Int
+> t = Node 2 (Node 1 Leaf Leaf) (Node 3 Leaf Leaf)
+
+Definição de Tipos em Haskell --- (XIX)
 ========================================
 
 - Exemplos: Funções sobre árvores polimórficas
@@ -183,7 +251,7 @@ Definição de Tipos em Haskell --- (XIII)
 >       | otherwise = Node y l (insert x r)
 
 
-Definição de Tipos em Haskell --- (XIV)
+Definição de Tipos em Haskell --- (XX)
 =======================================
 
 - Mais funções...
@@ -198,19 +266,38 @@ Definição de Tipos em Haskell --- (XIV)
 > size Leaf = 0
 > size (Node x l r) = 1 + size l + size r
 
-Definição de Tipos em Haskell --- (XV)
+Definição de Tipos em Haskell --- (XXI)
 ======================================
 
 - Note que as funções member e size, possuem um padrão:
     - Retornar um valor quando a árvore é vazia
     - Aplicar uma função aos valores do nó e aos resultados de processar recursivamente as subárvores.
 - Esse padrão é similar ao foldr para listas!
+    - Substitua o construtor [] por um valor fixo
+    - Substitua o construtor (:) por uma função de dois parâmetros
+
+
+Definição de Tipos em Haskell --- (XXII)
+=======================================
+
+- A idéia da função fold para árvores binárias é similar:
+    - Substitua o construtor Leaf por um valor fixo
+    - Substitua o construtor Node por uma função de *três* parâmetros.
+- Porquê três parâmetros?
+    - Um representa o valor associado ao nó
+    - Outros dois representam as duas subárvores esquerda e direita.
+
+Definição de Tipos em Haskell --- (XXIII)
+=========================================
+
+- Eis a definição de fold para árvores binárias.
 
 > fold :: (a -> b -> b -> b) -> b -> Tree a -> b
 > fold f v Leaf = v
 > fold f v (Node x l r) = f x (fold f v l) (fold f v r)
 
-Definição de Tipos em Haskell --- (XVI)
+
+Definição de Tipos em Haskell --- (XXIV)
 ======================================
 
 - Com isso, size e member ficam:
@@ -221,7 +308,7 @@ Definição de Tipos em Haskell --- (XVI)
 > member' :: Ord a => a -> Tree a -> Bool
 > member' x = fold (\k y z -> x == k || y || z) False
 
-Definição de Tipos em Haskell --- (XVII)
+Definição de Tipos em Haskell --- (XXV)
 ========================================
 
 - Mas exemplos, usando fold:
@@ -230,14 +317,14 @@ Definição de Tipos em Haskell --- (XVII)
 > preorder :: Tree a -> [a]
 > preorder = fold (\x l r -> x : (l ++ r)) []
 
-Definição de Tipos em Haskell --- (XVIII)
+Definição de Tipos em Haskell --- (XXVI)
 ========================================
 
 - Próxima semana...
      - Um exemplo de tipos de dados algébricos: Um compilador de expressões aritméticas para uma máquina de pilha!
      - Reunião na quarta-feira às 18:00 hrs!
 
-Definição de Tipos em Haskell --- (XIX)
+Definição de Tipos em Haskell --- (XXVII)
 ========================================
 
 - Tarefas para o recesso:
