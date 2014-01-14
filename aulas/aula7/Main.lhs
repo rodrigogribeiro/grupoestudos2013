@@ -1,6 +1,15 @@
 % Compilando Expressões
-% Prof. Rodrigo Ribeiro
+% Prof. Rodrigo Ribeiro e prof. Elton Cardoso
 % Programação Funcional em Haskell
+
+Configurações iniciais
+======================
+
+> module Main where
+
+> import Preliminaries
+> import Parser
+> import Text.ParserCombinators.Parsec
 
 Compilando Expressões --- (I)
 =============================
@@ -43,10 +52,12 @@ Compilando Expressões --- (V)
 
 - Expressões --- nossa linguagem fonte:
 
-> data Exp = Const Int
->          | Add Exp Exp
->          | Mult Exp Exp
->          deriving (Eq, Ord, Show)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.haskell}
+data Exp = Const Int
+         | Add Exp Exp
+         | Mult Exp Exp
+         deriving (Eq, Ord, Show)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                   
 
 Compilando Expressões --- (VI)
 ===============================
@@ -125,6 +136,68 @@ Compilando Expressões --- (XII)
 Compilando Expressões --- (XIII)
 ================================
 
-- Gerando código para o assemblador NASM...
+- Gerando código para o assemblador NASM: 
+- NASM (Netwide Assembler) é uma linguagem de programação de baixo nível. 
+- Apesar disso, dada a simplicidade da linguagem de expressões aqui abordada
+  é muito simples converter nossa representação intermediária em um programa NASM
+
+Compilando Expressões --- (XIV)
+================================
+- Em geral processadores já gerenciam a memória em forma de uma pilha.
+- Em NASM podemos acessar a diretamente a pilha de memória da máquina por meio das
+  instruções \textbf{puhs} e \textbf{pop}
+- A instrução para somar dois números em NASM é \textbf{add} e para multiplicar usaremos
+  \textbf{IMUL}.
+
+Compilando Expressões --- (XIV)
+================================
+- Existem 4 registradores de propósito geral (32 bits)
+- eax, ebx, ecx e edx.
+- Cada um é subvidido em ax (16 bits mais baixos de eax), bx, etc.
+- eax por sua vez é subdividido em ah (oito bits mais altos) e al (oito bits mais baixos), o mesmo
+  vale para bx, cx e dx.
+
+  
+Compilando Expressões --- (XV)
+================================
+
+> programToNasm :: Program -> [String] 
+> programToNasm = foldr encode [] 
+>    where encode (Number i) s = ("push dword " ++ show i):s
+>          encode Plus s = "pop eax":
+>                          "pop ebx":
+>                          "add eax, ebx":
+>                          "push eax":s 
+>          encode Times s = "pop eax":
+>                           "pop ebx":
+>                           "imul eax, ebx":
+>                           "push eax":s 
+
+Compilando Expressões --- (XV)
+================================
+-  Para gerar um programa que pode ser compilado pelo NASM
+   precisamos apenas adicionar código para realizar funções secundárias, 
+   como converter inteiros e string e imprimir o resultado na tela.
+
+> compileToNasm :: Program -> String 
+> compileToNasm p = unlines $ header  ++
+>                   (programToNasm p) ++
+>                   suffix
+
+Função Main
+===============================
+
+> main = do
+>   putStrLn "Type the expression:"
+>   l <- getLine
+>   case parse expr "" l of
+>     Left err -> print err
+>     Right e  -> write e
+
+> write :: Exp -> IO ()
+> write e = writeFile "Main.nasm" s
+>           where
+>             p = compile e
+>             s = compileToNasm p
 
 
