@@ -195,7 +195,7 @@ Função Main
 >     Right e  -> write e
 
 > write :: Exp -> IO ()
-> write e = writeFile "Main.nasm" s
+> write e = writeFile "Expr.nasm" s
 >           where
 >             p = compile e
 >             s = compileToNasm p
