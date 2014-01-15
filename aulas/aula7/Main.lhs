@@ -83,7 +83,7 @@ Compilando Expressões --- (VIII)
 - O resultado de compilação da expressão anterior deve ser:
 
 > c :: Program
-> c = [Number 3, Number 5, Times, Number 2, Plus]
+> c = [Number 2,Number 3,Number 5,Times,Plus]
 
 Compilando Expressões --- (IX)
 ==============================
@@ -119,8 +119,8 @@ Compilando Expressões --- (XI)
 
 > compile :: Exp -> Program
 > compile (Const n) = [Number n]
-> compile (Add e e') = compile e' ++ compile e ++ [Plus]
-> compile (Mult e e') = compile e' ++ compile e ++ [Times]
+> compile (Add e e') = compile e ++ compile e' ++ [Plus]
+> compile (Mult e e') = compile e ++ compile e' ++ [Times]
 
 Compilando Expressões --- (XII)
 ==============================
