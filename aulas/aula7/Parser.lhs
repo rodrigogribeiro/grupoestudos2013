@@ -2,6 +2,9 @@
 
 > import Text.ParserCombinators.Parsec
 > import Text.ParserCombinators.Parsec.Expr
+> import qualified Text.Parsec.Token as P
+> import Text.Parsec.Language (haskellStyle)
+> import Data.Functor
 
 > data Exp = Const Int
 >          | Add Exp Exp
@@ -15,11 +18,15 @@
 > table = [[ op "*" Mult AssocLeft],
 >          [ op "+" Add  AssocLeft]]
 >         where
->           op s f assoc = Infix (do {string s ; return f}) assoc
+>           op s f assoc = Infix (do {P.symbol lexer s ; return f}) assoc
 
-> factor = do { char '(' ; x <- expr ; char ')' ; return x }
+> factor = try (parens expr)
 >          <|> number
 >          <?> "simple expression"
   
 > number :: Parser Exp
-> number = do { ds <- many1 digit; return (Const (read ds)) } <?> "number"
+> number = (Const . fromInteger <$> P.natural lexer) <?> "number"
+
+> parens = P.parens lexer
+
+> lexer = P.makeTokenParser haskellStyle
