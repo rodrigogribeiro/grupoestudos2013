@@ -1,0 +1,319 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[brazil]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath,amsfonts}
+\usepackage{bussproofs}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usepackage{latexsym}
+\usepackage{pgf}
+\usepackage[pdftex]{hyperref}
+
+ 
+\begin{document}
+\noindent Curso de Sistemas de Informa\c{c}\~ao / Engenharia de Computa\c{c}\~ao\\
+UFOP \\
+{\it Grupo de Estudos de Programa\c{c}\~ao Funcional}\\
+Professor: \parbox[t]{14cm}{Rodrigo Geraldo Ribeiro \\
+                     e-mail: rodrigo@decsi.ufop.br}
+  
+
+\section{Xeque-Mate!}
+
+O xadrez \'e um dos jogos de estrat\'egia mais antigos de toda a hist\'oria.
+Neste trabalho voc\^e dever\'a implementar fun\c{c}\~oes para realizar o 
+processamento de arquivos PGN --- Portable Game Notation --- que s\~ao normalmente 
+utilizados para a descri\c{c}\~ao de jogos de xadrez. Maiores detalhes podem 
+ser encontrados em:
+\begin{center}
+	\href{http://en.wikipedia.org/wiki/Portable_Game_Notation}{http://en.wikipedia.org/wiki/Portable$\_$Game$\_$Notation}
+\end{center}
+Diversos softwares permitem utilizar este formato para ``salvar'' o progresso
+de um determinado jogo de xadrez ou mesmo para permitir a visualiza\c{c}\~ao
+``passo-a-passo'' de uma partida descrita neste formato.
+
+N\~ao existem descri\c{c}\~oes formais deste formato, portanto adotaremos 
+uma descri\c{c}\~ao aproximada que deve ser sufuciente para que as 
+fun\c{c}\~oes implementadas processem um grande n\'umero de arquivos PGN
+dispon\'iveis na internet.
+
+Para a implementa\c{c}\~ao deste trabalho, n\~ao \'e necess\'ario um 
+conhecimento pr\'evio de Xadrez. Caso voc\^e n\~ao conhe\c{c}a 
+absolutamente nada sobre as regras de Xadrez, uma boa refer\^encia \'e:
+\begin{center}
+	\href{http://en.wikipedia.org/wiki/Chess}{http://en.wikipedia.org/wiki/Chess}
+\end{center}
+que dever\'a ser suficiente para voc\^e conhecer sobre como s\~ao 
+identificadas cada uma das posi\c{c}\~oes do tabuleiro, cada uma das pe\c{c}as
+e seus respectivos movimentos. 
+
+Para este trabalho, voc\^e dever\'a utilizar a biblioteca de \emph{parsing}
+presente no arquivo \texttt{ParseLib.hs}. N\~ao ser\'a necess\'ario voc\^e
+implement\'a-la, pois esta estar\'a dispon\'ivel na p\'agina da disciplina 
+(arquivo \texttt{ParseLib.hs}). Adicionalmente, ser\'a fornecida uma 
+implementa\c{c}\~ao parcial que voc\^e dever\'a utilizar no desenvolvimento
+de sua solu\c{c}\~ao (arquivo \texttt{Chess.hs}). Sinta-se livre para 
+adicionar quantos m\'odulos julgar necess\'ario em seu programa. 
+Ao contr\'ario do trabalho anterior, menos c\'odigo ser\'a fornecido. Isso
+se deve ao fato que grande parte das fun\c{c}\~oes que voc\^e dever\'a 
+codificar depender\~ao dos tipos de dados que ser\~ao definidos por voc\^e
+para representar a \'arvore de sintaxe da gram\'atica que especifica 
+arquivos PGN. 
+
+\section{Especifica\c{c}\~ao}
+
+A especifica\c{c}\~ao do trabalho ser\'a feita por uma descri\c{c}\~ao 
+passo-a-passo. Para isso, primeiramente descreveremos a estrutura de
+um movimento e em seguida especificaremos como dever\'a ser a estrutura
+de um arquivo PGN por completo.
+
+\subsection{Movimentos}\label{san}
+
+A nota\c{c}\~ao padr\~ao para descri\c{c}\~ao de movimentos em jogos de 
+xadrez \'e denominada \textit{SAN --- Standard Algebraic Notation}, que
+\'e descrita pela seguinte gram\'atica livre de contexto:
+
+\begin{tabular}{lcl}
+	\textit{move} & $\rightarrow$ & \textit{piece disambiguation capture square promotion check}\\
+	              & $|$           & \verb|O-O-O| \\
+	              & $|$           & \verb|O-O| \\
+	\textit{piece} & $\rightarrow$ & \texttt{N $|$ R $|$ B $|$ Q $|$ K $|\,\lambda$}\\
+	\textit{disambiguation} & $\rightarrow$ & \textit{file $|$ rank $|$ square $|\,\lambda$}\\
+	\textit{capture} & $\rightarrow$ & \texttt{x} $|\,\lambda$\\
+	\textit{square} & $\rightarrow$ & \textit{file rank} \\
+	\textit{promotion} & $\rightarrow$ & \texttt{=} \textit{piece} $|\,\lambda$\\
+	\textit{check} & $\rightarrow$ & \texttt{+} $|$ $\#$ $|\,\lambda$\\
+	\textit{file} & $\rightarrow$ & \texttt{a $|$ b $|$ c $|$ d $|$ e $|$ f $|$ g $|$ h}\\
+	\textit{rank} & $\rightarrow$ & \texttt{1 $|$ 2 $|$ 3 $|$ 4 $|$ 5 $|$ 6 $|$ 7 $|$ 8}\\
+\end{tabular}
+Terminais s\~ao descritos usando fonte \texttt{typewriter} e n\~ao-terminais 
+em \textit{it\'alico}. Um movimento pode ser regular ou especial. Movimentos
+regulares s\~ao descritos por uma sequ\^encia indicando a pe\c{c}a a ser 
+movida, uma sequ\^encia para evitar ambiguidades entre pe\c{c}as de uma 
+mesma categoria fornecendo dados sobre a posi\c{c}\~ao inicial do 
+movimento, uma indica\c{c}\~ao se o movimento resultou em uma captura, 
+a posi\c{c}\~ao de destino do movimento descrito, informa\c{c}\~ao sobre
+uma poss\'ivel promo\c{c}\~ao de um pe\~ao e se este movimento resultou
+em um xeque ou xeque-mate. Existem dois movimentos especiais, denominados
+``roque'', onde o rei e uma das torres s\~ao movidas simultaneamente. O 
+roque do lado da rainha \'e especificado por \texttt{O-O-O} (composto por
+letras \texttt{O} e \texttt{-}) e o do lado do rei por \texttt{O-O}.
+
+A pe\c{c}a movida \'e indicada por uma letra mai\'uscula. A letra \texttt{N}
+representa o cavalo (kNight), \texttt{B} bispo (Bishop), 
+\texttt{R} torre (Rook), \texttt{Q} rainha (Queen) e \texttt{K} rei (King).
+N\~ao \'e utilizada nenhuma letra para representar o movimento de um pe\~ao.
+
+Na maioria dos casos, as regras do jogo e / ou a situa\c{c}\~ao do tabuleiro 
+determinam unicamente, dado uma posi\c{c}\~ao de destino, qual pe\c{c}a est\'a
+sendo movida. Se este n\~ao \'e o caso, alguma informa\c{c}\~ao sobre a posi\c{c}\~ao
+inicial pode ser fornecida, por meio de um file (coluna), rank (linha) ou uma 
+posi\c{c}\~ao espec\'ifica do tabuleiro. Um file consiste da coluna onde uma pe\c{c}a
+est\'a localizada e \'e destrito por uma letra de \texttt{a} a \texttt{h}. Um rank
+\'e a linha onde a pe\c{c}a est\'a localizada e \'e descrita por um n\'umero de 1 a 8. 
+
+Se durante um movimento h\'a uma captura, isso \'e indicado por um \texttt{x} entre
+uma especifica\c{c}\~ao de ambiguidade e a posi\c{c}\~ao de destino.
+
+Se um pe\~ao alcan\c{c}ar a linha ``base'' do openente, ele pode ser ``promovido'' para
+outra pe\c{c}a. Isto \'e indicado pelo s\'imbolo \texttt{=} e a letra da pe\c{c}a para a
+qual o pe\~ao ser\'a promovido.
+
+Quando um movimento resulta em um xeque ou em um xeque-mate, isto \'e indicado pelo 
+acr\'escimo dos s\'imbolos \texttt{+} ou um \texttt{\#}, respectivamente, a descri\c{c}\~ao
+do movimento.
+
+\textbf{N\~ao \'e permitido nenhum tipo de espa\c{c}os em uma string que especifica um movimento!}
+
+\begin{enumerate}
+	\item (\emph{trivial}) --- Defina tipos de dados Haskell para descrever a sintaxe de um movimento. D\^e o nome
+	      \texttt{Move} para este tipo de dados (como especificado no c\'odigo fornecido).
+	      Especifique uma cl\'ausula \texttt{deriving Eq} e uma inst\^ancia de \texttt{Show}
+	      para este tipo de dados que permita a impress\~ao de um movimento representado por um
+	      valor do tipo que voc\^e definiu.
+	\item (\emph{m\'edio}) --- Defina um parser
+	\begin{center}
+		\texttt{parseMove :: Parser Char Move}
+	\end{center}
+	que realiza o parsing de um \'unico movimento. Seja \texttt{m} um valor qualquer de tipo
+	\texttt{Move} sua fun\c{c}\~ao \texttt{parseMove} deve ser tal que
+	\begin{center}
+		\texttt{run parseMove (show m) == m}
+	\end{center}
+	deve retornar \texttt{True}. Para testar seu parser, utilize as seguintes strings:
+	\begin{itemize}
+		\item ``\texttt{e4}''
+		\item ``\texttt{Nf3xg5+}''
+		\item ``\texttt{Qa8=N}''
+	\end{itemize}
+	O \'ultimo exemplo, apesar de aceito pela gram\'atica (e por consequ\^encia, por seu parser), n\~ao \'e
+	um movimento v\'alido em um jogo de xadrez, j\'a que somente pe\~oes podem ser promovidos (neste movimento,
+	\'e feita a promo\c{c}\~ao de uma rainha). Uma promo\c{c}\~ao \'e v\'alida se um pe\~ao de cor preta for 
+	movido para a linha 1 ou se um pe\~ao branco for movido para a linha 8.
+	\item (\emph{f\'acil}) --- Escreva uma fun\c{c}\~ao
+	\begin{center}
+		\texttt{promotionCheck :: Move -> Bool}
+	\end{center}
+	que verifica se um movimento possui uma promo\c{c}\~ao ilegal. Isto \'e ele deve retornar \texttt{True} sempre
+	que um movimento n\~ao possuir uma promo\c{c}\~ao ou possuir uma promo\c{c}\~ao v\'alida.
+\end{enumerate}
+
+\subsection{Sintaxe de Arquivos PGN}
+
+A sintaxe de um arquivo PGN \'e dada pela seguinte gram\'atica livre de contexto:
+
+\begin{tabular}{rcl}
+	\textit{pgn} & $\rightarrow$ & \textit{game pgn $|\,\lambda$}\\
+	\textit{game} & $\rightarrow$ & \textit{tags movetext}\\
+	\textit{tags} & $\rightarrow$ & \textit{tag tags $|\,\lambda$}\\
+	\textit{tag} & $\rightarrow$ & \texttt{[}\textit{name value}\texttt{]}\\
+	\textit{name} & $\rightarrow$ & \textit{symbol}\\
+	\textit{value} & $\rightarrow$ & \textit{string}\\
+	\textit{movetext} & $\rightarrow$ & \textit{elements termination}\\
+	\textit{elements} & $\rightarrow$ & \textit{element elements}\\
+					  & $|$           & \textit{variation elements}\\
+					  & $|$           & $\lambda$\\ 
+	\textit{element}  & $\rightarrow$ & \textit{numopt move nagopt}\\
+	                  & $|$           & $\lambda$\\		
+	\textit{variation} & $\rightarrow$ & \texttt{(}\textit{elements}\texttt{)}\\
+	\textit{termination} & $\rightarrow$ & \texttt{1-0}\\
+						 & $|$           & \texttt{0-1}\\
+						 & $|$           & \texttt{1/2-1/2}\\
+						 & $|$           & \texttt{*}\\	
+	\textit{numopt}       & $\rightarrow$ & \textit{number}\\
+						 & $|$           & $\lambda$\\	  
+	\textit{nagopt}       & $\rightarrow$ & \textit{nag}\\
+	                     & $|$           & $\lambda$\\
+	\textit{number}      & $\rightarrow$ & \textit{natural dots}\\
+	\textit{dots}        & $\rightarrow$ & \texttt{.} \textit{dots}\\
+						 & $|$           & $\lambda$\\
+	\textit{nag}         & $\rightarrow$ & \texttt{\$} $digit^{*}$\\
+\end{tabular}
+
+Diferentes n\~ao terminais na gram\'atica anterior s\~ao seperados por
+um n\'umero arbitr\'ario de espa\c{c}os. 
+
+Os componentes l\'exicos s\~ao especificados pela seguinte gram\'atica:
+
+\begin{tabular}{rcl}
+	\textit{symbol} & $\rightarrow$ & (\textit{letter $|$ digit})(\textit{letter $|$ digit} $|$ \texttt{\_} $|$ 
+	\texttt{\#} $|$ \texttt{=} $|$ \texttt{:} $|$ \texttt{-} $|$ \texttt{/})$^{*}$\\
+	\textit{string} & $\rightarrow$ & \texttt{``} (\textit{quoted $|$ char})$^{*}$ \texttt{''}\\
+	\textit{quoted} & $\rightarrow$ & \verb|\|\textit{char}\\
+					& $|$           & \verb|\\|\\
+					& $|$           & \verb|\"|\\
+	\textit{letter} & $\rightarrow$ & qualquer letra mai\'uscula ou minin\'uscula.\\
+	\textit{digit}  & $\rightarrow$ & qualquer d\'igito.\\
+	\textit{char}   & $\rightarrow$ & qualquer caractere imprim\'ivel exceto \verb|"| e \verb|\|\\
+\end{tabular}
+
+Nenhum espa\c{c}o em branco \'e permitido nas produ\c{c}\~oes da espeficica\c{c}\~ao l\'exica.
+
+Informalmente, todo arquivo PGN consiste de uma sequ\^encia de jogos. Todo jogo, por sua vez, consiste 
+de duas partes: tags e movimentos. Tags s\~ao uma lista de pares nome-valor entre colchetes. A lista 
+de movimentos e assim o um jogo como um todo \'e sempre encerrado por um indicador do resultado deste jogo,
+que pode ser \texttt{1-0} (pe\c{c}as brancas venceram), \texttt{0-1} (pe\c{c}as pretas venceram), 
+\texttt{1/2-1/2} (empate) ou \texttt{*} (resultado desconhecido). 
+
+Cada movimento \'e introduzido por um n\'umero opcional, que por sua vez pode ser seguido por um n\'umero
+arbitr\'ario de pontos. Um movimento propriamente dito \'e descrito usando a nota\c{c}\~ao \emph{SAN} 
+(introduzida na se\c{c}\~ao \ref{san}). Um movimento pode possuir um valor n\'umerico opcional, denominado NAG
+--- Numeric Annotation Glyph --- que nada mais \'e que um n\'umero natural que indica algum tipo de informa\c{c}\~ao
+(muitas vezes subjetiva) sobre um determinado movimento (por exemplo, se este foi bom ou ruim). O formato PGN pode
+tamb\'em descrever varia\c{c}\~oes de um jogo (algo simular a `` o que aconteceria se...''). Tais varia\c{c}\~oes
+consistem de uma sequ\^encia de movimentos entre par\^enteses. Na gram\'atica apresentada anteriormente, note a 
+diferen\c{c}a entre par\^enteses que pertencem a linguagem de arquivos PGN (denotados por \texttt{()} em fonte 
+\texttt{typewriter}) de par\^enteses que s\~ao utilizados na nota\c{c}\~ao que descreve gram\'aticas (que s\~ao 
+par\^enteses escritos em fonte normal.).
+
+Um s\'imbolo \'e introduzido por uma letra ou d\'igito, e ent\~ao seguido por um n\'umero arbitr\'ario de letras
+, d\'igitos ou alguns caracteres espec\'ificos. S\'imbolos s\~ao usados para descrever os nomes das tags. Strings
+s\~ao envolvidos por aspas duplas ``'' e s\~ao utilizadas para descrever valores de tags. Um NAG \'e introduzido
+por um s\'imbolo \texttt{\$} seguido de um n\'umero qualquer de d\'igitos. 
+
+\begin{itemize}
+	\item[4 .] (\emph{f\'acil}) --- Defina tipos de dados Haskell para representar a sintaxe de arquivos PGN.
+	\item[5 .] (\emph{dif\'icil}) --- Defina uma fun\c{c}\~ao
+	\begin{center}
+		\texttt{parsePGN :: Parser Char PGN}
+	\end{center}
+	que realiza o parsing de um arquivo PGN completo. Observer que n\~ao \'e obrigat\'orio 
+	que voc\^e realize o parsing diretamente a partir de uma string. Voc\^e pode optar por
+	contruir um analisar l\'exico que transforma a string em uma lista de tokens e partir destes
+	escrever o parser.
+	\item[6 .] (\emph{f\'acil}) --- Defina uma fun\c{c}\~ao
+	\begin{center}
+		\texttt{statistics :: PGN -> IO()}
+	\end{center}
+	que coleta e imprime as seguintes informa\c{c}\~oes sobre os jogos contidos no arquivo PGN processado:
+	\begin{itemize}
+		\item Quantos jogos foram disputados?
+		\item Quantas partidas foram vencidas pelas pe\c{c}as brancas, e pelas pe\c{c}as pretas? 
+		\item Em cada jogo, qual a quantidade de pe\c{c}as que cada jogador possui ao final da partida?
+	\end{itemize}
+	Para simplificar o processo de teste, defina uma fun\c{c}\~ao para cada uma destas estat\'isticas.
+\end{itemize}
+
+\subsection{Descrevendo a Situa\c{c}\~ao Atual do Tabuleiro}
+
+Toda a nota\c{c}\~ao apresentada at\'e o momento serve apenas para descri\c{c}\~ao de uma sequ\^encia de movimentos 
+que define um jogo completo de xadrez. Por\'em, em alguns tipos de quebra-cabe\c{c}as \'e \'util descrever a 
+situa\c{c}\~ao atual do tabuleiro de maneira expl\'icita\footnote{Um tipo destes quebra-cabe\c{c}as consiste em 
+dada uma configura\c{c}\~ao de tabuleiro um dos lados (preto ou branco) deve obter um xeque-mate em 
+$n\geq 1$ movimentos.}.
+A nota\c{c}\~ao FEN --- Forsyth-Edwards Notation --- \'e utilizada para este prop\'osito. Uma descri\c{c}\~ao
+detalhada sobre este formato pode ser encontrada em:
+
+\begin{center}
+	\href{http://en.wikipedia.org/wiki/Forsyth-Edwards\_Notation}
+	     {http://en.wikipedia.org/wiki/Forsyth-Edwards\_Notation}
+\end{center}
+Ao contr\'ario do formato utilizado em arquivos PGN este \'e bem simples e pode ser encontrado de duas formas:
+\begin{itemize}
+	\item Em um arquivo texto de extens\~ao \texttt{.fen}.
+	\item Em uma tag de nome \texttt{FEN} em um arquivo PGN. Neste caso, este arquivo possuir\'a um tag de nome 
+	      \texttt{FEN} e respectivo valor uma string que descreve o estado atual do tabuleiro. 
+\end{itemize}
+
+\begin{itemize}
+	\item [7. ] (\emph{f\'acil}) --- Descreva utilizando uma gram\'atica livre de contexto, o formato FEN.
+	\item [8. ] (\emph{m\'edio}) --- Descreva a nota\c{c}\~ao FEN utilizando um tipo de dados Haskell. Defina
+	            uma inst\^ancia da classe \texttt{Show} para seu tipo definido de maneira que a string produzida
+	            seja similar a uma visualiza\c{c}\~ao de um tabuleiro de xadrez.
+	\item [9. ] (\emph{dif\'icil}) --- Defina a fun\c{c}\~ao
+	\begin{center}
+		\texttt{parseFEN :: Parser Char FEN}
+	\end{center}
+	que realiza o parsing de uma string que representa a nota\c{c}\~ao FEN. Novamente, voc\^e pode optar por
+	utilizar um analisador l\'exico ao inv\'es de realizar o parsing diretamente. Modifique o parser de arquivos
+	PGN de maneira que este reconhe\c{c}a tags FEN e retorne o tipo de dados PGN (j\'a definido por voc\^e) e o
+	tipo de dados FEN.
+\end{itemize}
+
+\subsection{Especifica\c{c}\~ao da Intera\c{c}\~ao}
+
+At\'e o presente momento n\~ao foi especificado como dever\'a ser a intera\c{c}\~ao do usu\'ario de seu software.
+Como j\'a especificado anteriormente, seu programa dever\'a processar dois tipos de arquivos: PGN e FEN.
+\begin{itemize}
+	\item [10.] (\emph{m\'edio}) --- Elabore uma interface de linha de comando para permitir ao usu\'ario selecionar
+	            qual o tipo de arquivo ele deseja processar. Preferencialmente, utilize uma estrutura similar a 
+	            par\^ametros passador a comandos executados em um terminal.
+	\item [11. ] (\emph{f\'acil}) --- Produza como sa\'ida para arquivos PGN suas estat\'isticas e para arquivos FEN
+	            um desenho do tabuleiro. Caso o arquivo PGN possua uma tag FEN, primeiro imprima o tabuleiro e depois
+	            apresente as estat\'isticas.
+	\item[12. ] (\emph{m\'edio}) --- Altere o seu parser de arquivos PGN para permitir que estes arquivos 
+	      possuam coment\'arios.
+	\item[13. ] (\emph{dif\'icil}) --- Os tipos de dados PGN e FEN s\~ao complementares. Enquanto um descreve os movimentos,
+	      o outro descreve a situa\c{c}\~ao atual do tabuleiro. Utilizando estes dois tipos de dados \'e poss\'ivel
+	      descrever uma fun\c{c}\~ao que \'e capaz de executar um jogo de xadrez ``passo-a-passo'', isto \'e, a
+	      partir de cada movimento descrito no tipo PGN pode-se modificar o tabuleiro descrito pelo tipo FEN.
+	      Implemente uma fun\c{c}\~ao que dado um valor de tipo PGN permita repetir todo um jogo mostrando passo-a-passo
+	      o estado do tabuleiro. Note que um efeito colateral desta fun\c{c}\~ao \'e a descoberta de movimentos ilegais
+	      descritos em um arquivo PGN.
+\end{itemize}
+ 
+\end{document}
+
+
